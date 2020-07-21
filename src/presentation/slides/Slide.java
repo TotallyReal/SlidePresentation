@@ -54,8 +54,6 @@ public abstract class Slide implements AnimationNode {
     public static final int PREF_HEIGHT = 720;
 
     private double RATE = 1;
-    
-    private int tenptenp = 10;
 
     private int step = 0;
     protected DragPane mainPane;
@@ -120,6 +118,7 @@ public abstract class Slide implements AnimationNode {
         return width;
     }
 
+    
     protected void centerNode(Node node) {
         MOB.centerNodeAt(node, getWidth() / 2, getHeight() / 2);
     }
