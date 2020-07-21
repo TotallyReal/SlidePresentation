@@ -1156,7 +1156,7 @@ public abstract class Slide implements AnimationNode {
     }
     
     private void createFeature(){
-      
+      System.out.println("This is a new feature");
     }
 
     
