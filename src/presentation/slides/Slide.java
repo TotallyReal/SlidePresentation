@@ -1142,7 +1142,7 @@ public abstract class Slide implements AnimationNode {
     public static List<Method> getAnimationList() {
         return null;
     }
-
+    
     public static List<Method> getAnimationList(Class cls) {
         Method[] methods = cls.getDeclaredMethods();
         Stream<Method> stream = Arrays.stream(methods);
@@ -1155,7 +1155,8 @@ public abstract class Slide implements AnimationNode {
         return list;
     }
 
-    //  Old code. Keep here for just in case....
+    
+    //  Old code. Keep here for just in case.....
     //------------------------------------------------------------------
     // <editor-fold defaultstate="collapsed" desc="Video">
     /* public void printVideoTimes() {
