@@ -10,16 +10,12 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
 /**
  *
  * @author eofir
  */
 public class DragPane extends Group {
-
-    private Node firstNode;
 
     public DragPane() {
         super();
@@ -47,18 +43,18 @@ public class DragPane extends Group {
         ObservableList<Node> children = getChildren();
         Node node = children.remove(0);
         children.add(children.size() - 1, node);
-        firstNode = node;
+       // firstNode = node;
     }
 
     static class Delta {
 
         double x, y;
     }
-
+/*
     private static class DragContext {
 
         double mouseAnchorX, mouseAnchorY, initialTranslateX, initialTranslateY;
-    }
+    }*/
 
     private void enableDrag(final Node node) {
         final Delta dragDelta = new Delta();
@@ -74,8 +70,10 @@ public class DragPane extends Group {
         });
         node.setOnMouseReleased((MouseEvent mouseEvent) -> {
             node.getScene().setCursor(Cursor.HAND);
-            System.out.println(node.toString()+": new coordinates = ("+node.getLayoutX()+","+
+            System.out.println(node.toString()+": new coordinates (layout) = ("+node.getLayoutX()+","+
                     node.getLayoutY()+")");
+            System.out.println(node.toString()+": new coordinates (translate) = ("+node.getTranslateX()+","+
+                    node.getTranslateY()+")");
             mouseEvent.consume();
         });
         node.setOnMouseDragged((MouseEvent mouseEvent) -> {
