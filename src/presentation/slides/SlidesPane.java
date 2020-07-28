@@ -288,7 +288,7 @@ public class SlidesPane extends Pane {
 //            }
     }
 
-    event.consume();
+    //event.consume();
   }
 
   /**

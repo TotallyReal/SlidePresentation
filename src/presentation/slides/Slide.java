@@ -37,6 +37,7 @@ import presentation.markers.Markers;
 import presentation.markers.MarkerSet;
 import presentation.markers.MarkerSetInterface;
 import presentation.DragPane;
+import presentation.Parameter.Parameter;
 import presentation.animation.AnimationData;
 import presentation.animation.AnimationNode;
 import presentation.animation.ObjectData;
@@ -143,12 +144,20 @@ public abstract class Slide implements AnimationNode {
 
     private SlideData data;
     
+    protected Parameter getParameter(){
+      return slidesPane.getParameter();
+    }
+    
     protected Object C(String paramName, Object def){
       return slidesPane.getParameter().C(paramName, def);
     }
     
     protected Object C(String paramName){
       return slidesPane.getParameter().C(paramName);
+    }
+    
+    protected boolean setParameter(String paramName, Object obj){
+      return slidesPane.getParameter().setParameterByPath(paramName,obj);
     }
 
     /**
@@ -471,7 +480,7 @@ public abstract class Slide implements AnimationNode {
      * millis=0 to run from the start.
      */
     //problem with marker which are not video related inside a video!!!
-    private void runMethodByName(String markerName, double millis) {
+    public void runMethodByName(String markerName, double millis) {   //change back to private?
         Method method;
         //try {
         //method = aClass.getDeclaredMethod(markerName);

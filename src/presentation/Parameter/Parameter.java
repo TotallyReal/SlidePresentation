@@ -2,6 +2,7 @@ package presentation.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -14,7 +15,7 @@ import javafx.beans.property.StringProperty;
 public class Parameter implements java.io.Serializable {
 
   public static Parameter createRootParameter() {
-    return new Parameter("ROOT","Category",new ArrayList<Parameter>());
+    return new Parameter("ROOT", "Category", new ArrayList<Parameter>());
   }
 
   public Parameter() {
@@ -32,8 +33,8 @@ public class Parameter implements java.io.Serializable {
 
   /**
    * Create a parameter from a representing string
-   * 
-   * @param repString 
+   *
+   * @param repString
    */
   public Parameter(String repString) {
     this();
@@ -171,7 +172,116 @@ public class Parameter implements java.io.Serializable {
     return null;
   }
 
-  private static String objectType(Object obj) {
+  private static Parameter findChild(List<Parameter> list, String name) {
+    Optional<Parameter> first
+            = list.stream()
+                    .filter(p -> name.equals(p.getName()))
+                    .findFirst();
+    if (first.isPresent()) {
+      return first.get();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Search for a parameter with the given path.
+   *
+   * If the current parameter is ROOT.aa, and the path is bb.cc, then it
+   * searches for ROOT.aa.bb.cc. If ROOT.aa is not a category parameter, will
+   * always fail. Set create to true to create this path if it doesn't exist.
+   * Note that in this case the returned parameter will be empty
+   * (isEmpty()==true).
+   *
+   * @param paramName
+   * @param create
+   * @return
+   */
+  public Parameter search(String paramName, boolean create) {
+    if (paramName == null || !this.isCategory()) {
+      return null;
+    }
+    
+    String[] split = paramName.split("\\.");
+    for (String s : split){
+      if (s.equals("")) { //should never be empty
+        return null;
+      }
+    }
+    
+    List<Parameter> list = (List<Parameter>) getValue();
+    int index = 0;
+
+    Parameter child = findChild(list, split[index]);
+
+    while (child != null) {
+      if (index == split.length - 1) {
+        return child;
+      }
+      if (!child.isCategory()) //need to continue, but this is not a category!
+      {
+        return null;
+      }
+      list = (List<Parameter>) child.getValue();
+      index++;
+      child = findChild(list, split[index]);
+    }
+
+    if (create) {
+      return createObject(list, split, index);
+    } else {
+      return null;
+    }
+    /*
+      for (Parameter param : list) {
+        if (!split[index].equals(param.getName())) {
+          continue;
+        }
+        if (split[index].equals(param.getName())) {
+          if (index == split.length - 1) {
+            return param;
+            /*if (param.isCategory()) {
+              return null;
+            } else {
+              return param;
+            }*//*
+          } else {
+            if (param.isCategory()) {
+              list = (List<Parameter>) param.getValue();
+              index++;
+              found = true;
+              break;
+            } else {
+              return null;
+            }
+
+          }
+        }
+      }
+      if (!found) {
+        if (create) {
+          return createObject(list, split, index);
+        } else {
+          return null;
+        }
+      }
+     */
+    //}
+    //return null;
+  }
+
+  public boolean setParameterByPath(String paramName, Object obj) {
+    String typeS = objectType(obj);
+    if (obj == null || typeS == null) {
+      return false;
+    }
+    Parameter param = search(paramName, true);
+    param.setType(typeS);
+    param.setValue(obj);
+    return true;
+  }
+
+  public static String objectType(Object obj) {
     if (obj == null) {
       return null;
     }
@@ -203,6 +313,16 @@ public class Parameter implements java.io.Serializable {
     }
   }
 
+  /**
+   * Creates a new parameter described by the path, starting at index, and put
+   * it inside the list
+   *
+   * @param list
+   * @param path
+   * @param index
+   * @param obj
+   * @return
+   */
   private static Object createObject(List<Parameter> list, String[] path, int index, Object obj) {
     String type = objectType(obj);
     if (type == null || obj == null) {
@@ -218,6 +338,23 @@ public class Parameter implements java.io.Serializable {
     Parameter param = new Parameter(path[index], type, obj);
     list.add(param);
     return obj;
+  }
+
+  private static Parameter createObject(List<Parameter> list, String[] path, int index) {
+    for (; index < path.length - 1; index++) {
+      List<Parameter> childList = new ArrayList<Parameter>();
+      Parameter param = new Parameter(path[index], "Category", childList);
+      list.add(param);
+      list = childList;
+    }
+
+    Parameter param = new Parameter(path[index], null, null);
+    list.add(param);
+    return param;
+  }
+
+  public boolean isEmpty() {
+    return getType() == null;
   }
 
   // </editor-fold>
