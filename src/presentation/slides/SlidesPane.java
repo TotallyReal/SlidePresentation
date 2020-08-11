@@ -21,6 +21,11 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -32,13 +37,14 @@ import presentation.markers.GUI.MarkersEditor;
 public class SlidesPane extends Pane {
 
   public static PrintStream out;
+
   static {
     setPrintStream(null);
   }
-  
-  public static void setPrintStream(PrintStream stream){
-    if (stream==null){      
-      out = new PrintStream(new OutputStream(){
+
+  public static void setPrintStream(PrintStream stream) {
+    if (stream == null) {
+      out = new PrintStream(new OutputStream() {
         @Override
         public void write(int b) throws IOException {
         }
@@ -47,7 +53,7 @@ public class SlidesPane extends Pane {
       out = stream;
     }
   }
-  
+
   private Slide slides[];
   private boolean autoSlide = true;
   private boolean finishedSlide = true;
@@ -59,7 +65,6 @@ public class SlidesPane extends Pane {
   private final MarkersEditor markersStage;
 
   public SlidesPane() {
-
     setOnKeyPressed(this::keyPressed);
     setOnMousePressed(this::mousePressed);
     rate = 1;
@@ -93,8 +98,18 @@ public class SlidesPane extends Pane {
 
     super.getChildren().add(slides_pane);
   }
-  
-  public Parameter getParameter(){
+
+  public void setBackground(String fileName) {
+
+    Background bg = new Background(new BackgroundImage(
+            this.getImage(fileName), BackgroundRepeat.NO_REPEAT,
+            BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+            new BackgroundSize(Slide.PREF_WIDTH* 0.95, Slide.PREF_HEIGHT* 0.95, false, false, false, false)
+    ));
+    super.setBackground(bg);
+  }
+
+  public Parameter getParameter() {
     return C;
   }
 
@@ -137,6 +152,31 @@ public class SlidesPane extends Pane {
         Logger.getLogger(SlidesPane.class.getName()).log(Level.SEVERE, null, ex);
       }
     }
+  }
+
+  public void reloadParameter() {
+    if (paramFile == null || !paramFile.toString().endsWith(".param")) {
+      return;
+    }
+    C = Parameter.createRootParameter();
+    if (!paramFile.exists()) {
+      saveParameter();
+    } else {
+      try {
+        String str = new String(Files.readAllBytes(Paths.get(paramFile.getPath())));
+        Parameter param = Parameter.loadFromRepString(str);
+        if (param != null) {
+          C = param;
+        }
+        closeSlide();
+        startSlide(slideNum);
+      } catch (FileNotFoundException ex) {
+        Logger.getLogger(SlidesPane.class.getName()).log(Level.SEVERE, null, ex);
+      } catch (IOException ex) {
+        Logger.getLogger(SlidesPane.class.getName()).log(Level.SEVERE, null, ex);
+      }
+    }
+
   }
 
   public void setImageDirectory(File dir) {
@@ -203,6 +243,7 @@ public class SlidesPane extends Pane {
     }
   }
 
+  // --------------------- Mouse and keyboard input --------------------------
   /**
    * Key shortcuts -,+,* : normal speed, fast very fast.
    *
@@ -232,9 +273,9 @@ public class SlidesPane extends Pane {
     KeyCode code = event.getCode();
 
     SlidesPane.out.println("You pressed the key (" + event.getCode().getName() + ")");
-    if (code == KeyCode.F12) {
+    /*if (code == KeyCode.F12) {
       setRate(32);
-    }
+    }*/
     if (code == KeyCode.MULTIPLY) {
       setRate(12);
     }
@@ -286,6 +327,18 @@ public class SlidesPane extends Pane {
 //            } else {
 //                markersStage.show();
 //            }
+    }
+    if (event.isControlDown()) {
+      if (code == KeyCode.S) {
+        SlidesPane.out.println("Saving parameter");
+        slides[slideNum].saveParamNodes();
+        saveParameter();
+      }
+      if (code == KeyCode.L) {
+        SlidesPane.out.println("Loading parameter");
+        reloadParameter();
+        //slides[slideNum].loadParamNodes();
+      }
     }
 
     //event.consume();

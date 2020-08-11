@@ -63,24 +63,34 @@ public class DragPane extends Group {
             // record a delta distance for the drag and drop operation.
             dragDelta.x = mouseEvent.getSceneX();
             dragDelta.y = mouseEvent.getSceneY();
-            original.x = node.getLayoutX();
-            original.y = node.getLayoutY();
+           /* original.x = node.getLayoutX();
+            original.y = node.getLayoutY();*/
+            original.x = node.getTranslateX();
+            original.y = node.getTranslateY();
             node.getScene().setCursor(Cursor.MOVE);
             mouseEvent.consume();
         });
         node.setOnMouseReleased((MouseEvent mouseEvent) -> {
             node.getScene().setCursor(Cursor.HAND);
-            System.out.println(node.toString()+": new coordinates (layout) = ("+node.getLayoutX()+","+
-                    node.getLayoutY()+")");
-            System.out.println(node.toString()+": new coordinates (translate) = ("+node.getTranslateX()+","+
+            /*System.out.println(node.toString()+": new coordinates (layout) = ("+node.getLayoutX()+","+
+                    node.getLayoutY()+")");*/
+            System.out.println(node.toString()+" mouse change:");
+            System.out.println("  new translate = ("+node.getTranslateX()+","+
                     node.getTranslateY()+")");
+            System.out.println("  diff translate = ("+
+                    (node.getTranslateX()-original.x)+","+
+                    (node.getTranslateY()-original.y)+")");
+            if (mouseEvent.isControlDown()){
+              node.setTranslateX(original.x);
+              node.setTranslateY(original.y);
+            }
             mouseEvent.consume();
         });
         node.setOnMouseDragged((MouseEvent mouseEvent) -> {
-            node.setLayoutX(original.x+mouseEvent.getSceneX()- dragDelta.x);
-            node.setLayoutY(original.y+mouseEvent.getSceneY()- dragDelta.y);
-//            node.setTranslateX(mouseEvent.getSceneX() - dragDelta.x);            
-//            node.setTranslateY(mouseEvent.getSceneY() - dragDelta.y);
+            /*node.setLayoutX(original.x+mouseEvent.getSceneX()- dragDelta.x);
+            node.setLayoutY(original.y+mouseEvent.getSceneY()- dragDelta.y);*/
+            node.setTranslateX(original.x+mouseEvent.getSceneX() - dragDelta.x);            
+            node.setTranslateY(original.y+mouseEvent.getSceneY() - dragDelta.y);
             mouseEvent.consume();
         });
 
